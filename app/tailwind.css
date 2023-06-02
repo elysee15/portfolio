@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    @apply bg-[#F6F5EF];
+  }
+
+  a {
+    @apply text-secondary hover:text-primary hover:underline;
+  }
+
+  .hash:hover::after {
+    @apply content-[url('/icons/hash.svg')] ml-1;
+  }
+
+  form {
+    @apply flex flex-col grow flex-wrap gap-4;
+  }
+
+  fieldset {
+    @apply flex flex-col gap-2 md:w-1/2;
+  }
+
+  fieldset label {
+    @apply uppercase text-xs;
+  }
+
+  fieldset:has(input:required, textarea:required) label::after {
+    @apply content-['*'] text-red-500 font-bold ml-1;
+  }
+
+  fieldset input,
+  textarea {
+    @apply px-4 py-5 border rounded-lg bg-transparent outline-none focus-within:border-secondary transition-all duration-300 font-medium text-sm border-primary w-full;
+  }
+}
+
+@layer components {
+  .chip {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium uppercase border border-gray-500;
+  }
+
+  .active {
+    @apply bg-primary text-secondary;
+  }
+}
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+/* body {
+  color: rgb(var(--foreground-rgb));
+} */
