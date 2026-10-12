@@ -15,6 +15,25 @@ const nextConfig: NextConfig = {
     "/projets/[slug]": ["./src/content/projets/**/*.mdx"],
   },
   partialPrefetching: true,
+  // Defense-in-depth for a static, cookie-less site: clickjacking, MIME
+  // sniffing, referrer leakage and unused device APIs. No CSP here — Next
+  // inlines RSC flight data, so a useful policy needs a nonce from middleware.
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+          },
+        ],
+      },
+    ];
+  },
   turbopack: {
     rules: {
       "*.css": {
