@@ -1,26 +1,305 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* DESIGN.md: theme is switched by [data-theme="dark"], not a .dark class. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  /* Newsreader for reading, Geist for metadata/UI, Geist Mono for code. */
+  --font-serif: var(--font-newsreader);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-newsreader);
+
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+
+  /* Raw DESIGN.md tokens, usable as text-fg, border-border-token, bg-hover… */
+  --color-fg: var(--fg);
+  --color-bg: var(--bg);
+  --color-muted-token: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-border-token: var(--border-token);
+  --color-hover: var(--hover);
+
+  /* DESIGN.md: 4px kbd/focus, 6px cards, 8px palette & project preview. */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+
+  /* Widths — reading column 640px, illustration rail 280px, 96px gutter. */
+  --container-reading: 40rem;
+  --container-aside: 17.5rem;
+  --container-page: 63.5rem; /* 640 + 96 + 280 */
+  --gutter-page: 1.25rem; /* 20px mobile */
+  --gutter-page-sm: 1.5rem; /* 24px >= 640px */
+  --gutter-aside: 6rem; /* 96px */
+
+  /* Easing utilities: `ease-out`, `ease-in-out`. */
+  --ease-out: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* Type scale. Display and body are responsive → see @utility / base below. */
+  --text-h1: 1.75rem;
+  --text-h1--line-height: 1.25;
+  --text-h2: 1.25rem;
+  --text-h2--line-height: 1.4;
+  --text-kbd: 0.75rem;
+  --text-kbd--line-height: 1;
+  /* Geist Mono reads optically larger than Newsreader at the body size. */
+  --text-code: 0.9375rem;
+  --text-code--line-height: 1.6;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Duration utilities. Tailwind's `duration-*` reads the `--transition-duration-*`
+   namespace, so the DESIGN.md names are aliased onto it. Deliberately NOT
+   `inline`: the utilities must emit `var(…)` so the reduced-motion override of
+   `--duration-*` in `:root` below still zeroes them. */
+@theme {
+  --transition-duration-fast: var(--duration-fast);
+  --transition-duration-base: var(--duration-base);
+  --transition-duration-slow: var(--duration-slow);
+  --default-transition-duration: var(--duration-fast);
+  --default-transition-timing-function: var(--ease-out);
+}
+
+/* Page shell: side margins 20px → 24px, widening once the aside rail appears. */
+@utility container-page {
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: var(--gutter-page);
+  max-width: calc(var(--container-reading) + 2 * var(--gutter-page));
+
+  @media (width >= 40rem) {
+    padding-inline: var(--gutter-page-sm);
+    max-width: calc(var(--container-reading) + 2 * var(--gutter-page-sm));
+  }
+
+  @media (width >= 64rem) {
+    max-width: calc(var(--container-page) + 2 * var(--gutter-page-sm));
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Reading column alone, then `640px 280px` with a 96px gutter at >= 1024px. */
+@utility layout-reading {
+  display: grid;
+  grid-template-columns: minmax(0, var(--container-reading));
+  column-gap: var(--gutter-aside);
+
+  @media (width >= 64rem) {
+    grid-template-columns: var(--container-reading) var(--container-aside);
+  }
+}
+
+/* Headings. Display drops to 30px on mobile. */
+@utility text-display {
+  font-size: 1.875rem;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+
+  @media (width >= 40rem) {
+    font-size: 2.25rem;
+  }
+}
+
+/* Dates, labels, inactive tabs. Pair with `text-muted-foreground`. */
+@utility text-meta {
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+}
+
+:root {
+  /* DESIGN.md scale — one warm gray, no accent color. */
+  --bg: #fafaf9;
+  --fg: #171716;
+  --muted: #6b6b67;
+  --subtle: #a3a39e;
+  --border-token: #e7e7e4;
+  --hover: #f2f2f0;
+
+  /* shadcn semantic tokens, mapped onto the scale above. */
+  --background: var(--bg);
+  --foreground: var(--fg);
+  --card: var(--bg);
+  --card-foreground: var(--fg);
+  --popover: var(--bg);
+  --popover-foreground: var(--fg);
+  --primary: var(--fg);
+  --primary-foreground: var(--bg);
+  --secondary: var(--hover);
+  --secondary-foreground: var(--fg);
+  --muted-foreground: var(--muted);
+  --accent: var(--hover);
+  --accent-foreground: var(--fg);
+  --border: var(--border-token);
+  --input: var(--border-token);
+  --ring: var(--fg);
+  /* Only non-gray value in the system: error states need to read as errors. */
+  --destructive: #8c2f22;
+
+  --radius: 0.5rem;
+
+  /* DESIGN.md motion tokens. */
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
+  --duration-slow: 300ms;
+  --ease-out: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+[data-theme="dark"] {
+  --bg: #0a0a0a;
+  --fg: #ededec;
+  --muted: #a1a19c;
+  --subtle: #5a5a56;
+  --border-token: #222221;
+  --hover: #141413;
+
+  --destructive: #e08b7d;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground font-serif;
+
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    text-wrap: pretty;
+  }
+
+  kbd {
+    @apply font-mono text-kbd rounded-sm border px-1 py-0.5;
+    font-variant-numeric: tabular-nums;
+  }
+
+  ::selection {
+    background: var(--fg);
+    color: var(--bg);
+  }
+
+  /* DESIGN.md: focus is :focus-visible only. */
+  :focus-visible {
+    outline: 2px solid var(--fg);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* --- MDX ------------------------------------------------------------- */
+
+  /* rehype-pretty-code is configured with an object `theme`, so shiki emits
+     `--shiki-light` / `--shiki-dark` per token and no inline `color`. The
+     `data-theme` it writes on <pre> is a list of theme *names*
+     ("github-light github-dark"), never the string "dark", so it can't trip
+     the @custom-variant above. Attribute selectors rather than a `figure`
+     mapping, which would also catch the <Figure> MDX component. */
+  [data-rehype-pretty-code-figure] {
+    @apply border-border-token bg-hover my-8 overflow-hidden rounded-lg border;
+  }
+
+  [data-rehype-pretty-code-figure] pre {
+    @apply px-4;
+  }
+
+  [data-rehype-pretty-code-figure] code span {
+    color: var(--shiki-light);
+  }
+
+  [data-theme="dark"] [data-rehype-pretty-code-figure] code span {
+    color: var(--shiki-dark);
+  }
+
+  /* ```ts title="…" */
+  [data-rehype-pretty-code-title] {
+    @apply text-meta text-muted-foreground border-border-token border-b px-4 py-2 font-mono;
+  }
+
+  [data-rehype-pretty-code-caption] {
+    @apply text-meta text-muted-foreground border-border-token border-t px-4 py-2;
+  }
+
+  /* `grid: true` gives each line its own row, so a highlight spans the gutter. */
+  [data-rehype-pretty-code-figure] code[data-line-numbers] {
+    counter-reset: line;
+  }
+
+  [data-rehype-pretty-code-figure] code[data-line-numbers] > .line::before {
+    counter-increment: line;
+    content: counter(line);
+    @apply text-subtle mr-4 inline-block w-4 text-right;
+  }
+
+  [data-rehype-pretty-code-figure] .line--highlighted {
+    @apply bg-foreground/5 -mx-4 px-4;
+  }
+
+  [data-rehype-pretty-code-figure] .word--highlighted {
+    @apply bg-foreground/10 rounded-sm px-0.5;
+  }
+
+  /* Heading anchors appended by rehype-autolink-headings. */
+  .heading-anchor {
+    @apply text-subtle hover:text-foreground duration-fast ml-2 no-underline opacity-0 transition-opacity ease-out;
+  }
+
+  :is(h1, h2, h3, h4):hover > .heading-anchor,
+  .heading-anchor:focus-visible {
+    @apply opacity-100;
+  }
+
+  /* GFM footnotes. */
+  .footnotes {
+    @apply text-meta text-muted-foreground border-border-token mt-16 border-t pt-6;
+  }
+
+  /* Chrome (nav, toggles, skip link) stays out of the printed CV. */
+  @media print {
+    [data-noprint],
+    .heading-anchor {
+      display: none !important;
+    }
+  }
+
+  /* Every animation is optional. */
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --duration-fast: 0ms;
+      --duration-base: 0ms;
+      --duration-slow: 0ms;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }

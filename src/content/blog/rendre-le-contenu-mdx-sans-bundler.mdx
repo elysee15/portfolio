@@ -1,0 +1,40 @@
+---
+title: "Rendre du MDX sans passer par le bundler"
+description: "Pourquoi next-mdx-remote plutôt que @next/mdx quand Turbopack refuse les options de plugins non sérialisables."
+date: 2026-03-14
+tags: ["next.js", "mdx", "turbopack"]
+draft: false
+---
+
+Turbopack passe les options des plugins remark et rehype à Rust. Une fonction ne
+traverse pas cette frontière : dès qu'un plugin attend autre chose qu'un objet
+JSON, l'intégration officielle `@next/mdx` n'est plus une option.
+
+## Le compromis
+
+`next-mdx-remote/rsc` compile le MDX côté serveur, au rendu, dans Node. Les
+options ne quittent jamais JavaScript, donc `rehype-pretty-code` et
+`rehype-autolink-headings` fonctionnent tels quels. En échange, un fichier
+`.mdx` n'est plus un module : c'est une chaîne lue par le [loader](/blog), et
+l'éditer ne déclenche pas de rebuild — un rafraîchissement suffit.
+
+```ts title="src/lib/content/mdx-options.ts"
+export const mdxOptions = {
+  format: "mdx",
+  remarkPlugins: [remarkGfm],
+  rehypePlugins: [[rehypePrettyCode, prettyCode], rehypeSlug],
+};
+```
+
+> La contrainte n'est pas le rendu, c'est la frontière entre JavaScript et Rust.
+
+<Callout variant="note">
+  Les expressions `{…}` sont retirées silencieusement depuis next-mdx-remote 6,
+  dont l'option `blockJS` vaut `true` par défaut.
+</Callout>
+
+## Ce que ça coûte
+
+- Une dépendance de plus, justifiée dans le README.
+- Un cache explicite : chaque lecture de fichier vit dans un scope `use cache`.
+- Aucune typage automatique des fichiers — d'où les schémas de frontmatter.

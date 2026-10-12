@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Portfolio — elyseebleu
 
-## Getting Started
+Monochrome editorial portfolio. Next.js 16 App Router, React 19, Tailwind v4, shadcn on
+Base UI. [DESIGN.md](./DESIGN.md) is the normative design system; [CLAUDE.md](./CLAUDE.md)
+holds the working rules.
 
-First, run the development server:
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+bun install
+bun run dev      # http://localhost:3000
+bun run build
+bun run lint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Bun is the package manager and script runner; the app itself is served by Next.js.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Writing content
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Editorial content is MDX under `src/content/<collection>/<slug>.mdx`, one flat file per
+entry — the filename is the URL slug. Structured data stays in TypeScript under `src/data/`.
+There is no backoffice: edit the file, push, redeploy.
 
-## Learn More
+| Collection | Route | Frontmatter |
+|---|---|---|
+| `blog` | `/blog`, `/blog/[slug]` | `title`, `description`, `date`, `tags`, `draft` |
+| `notes` | `/notes`, `/notes/[slug]` | same, `description` optional |
+| `projets` | `/projets`, `/projets/[slug]` | same + `role`, `stack`, `year`, `cover`, `url`, `repo` |
 
-To learn more about Next.js, take a look at the following resources:
+Frontmatter is validated with zod at build time: a bad field fails `next build` with the
+file path and the field name. Available in MDX bodies: `<Callout>`, `<Figure>`, `<TextLink>`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Three things worth knowing:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Each collection must contain **at least one non-draft file** — `cacheComponents` rejects an
+  empty `generateStaticParams`.
+- `draft: true` renders normally in `dev` and 404s in production.
+- Editing a `.mdx` file does not trigger a Turbopack rebuild (it is not in the module graph).
+  Refresh the page to pick up the change.
 
-## Deploy on Vercel
+## Dependencies
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Closed list (DESIGN.md § Dependencies); every addition is justified here.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Package | Why |
+|---|---|
+| `next-mdx-remote` | Compiles MDX in RSC at render time. `@next/mdx` can't be used: Turbopack passes plugin options to Rust, and neither the autolink `content` node nor the pretty-code theme object survives that crossing. |
+| `shiki`, `rehype-pretty-code` | Build-time syntax highlighting, dual light/dark theme, zero client JS. |
+| `remark-gfm` | Tables, footnotes, strikethrough, task lists. |
+| `rehype-slug`, `rehype-autolink-headings` | Heading ids and deep links into articles. |
+| `zod` | Frontmatter validation — a typo fails the build, not the page. |
+| `reading-time` | Reading estimate on list and detail pages. |
+| `yaml` | Parses frontmatter for list pages without compiling every MDX body. |
