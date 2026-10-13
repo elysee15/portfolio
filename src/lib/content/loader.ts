@@ -7,6 +7,11 @@
  * scope. The `cacheLife` / `cacheTag` preamble stays at the call site — the
  * function's location is part of the cache key and hoisting it into a helper
  * would collapse distinct entries.
+ *
+ * Content lives at `src/content/<locale>/<collection>/<slug>.mdx`. A slug does
+ * not have to exist in every locale: when a translation is missing the default
+ * locale's file is served instead and `meta.fallbackFrom` records it, so a page
+ * can say which language the reader is actually getting.
  */
 
 import "server-only";
@@ -18,6 +23,8 @@ import { cacheLife, cacheTag } from "next/cache";
 import readingTime from "reading-time";
 import { parse as parseYaml } from "yaml";
 
+import { type Locale, routing } from "@/src/i18n/routing";
+
 import { collections } from "./collections";
 import type { CollectionName, Entry, EntryMeta } from "./types";
 
@@ -27,8 +34,8 @@ const FRONTMATTER = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/;
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const MDX_EXTENSION = ".mdx";
 
-function collectionDir(collection: CollectionName): string {
-  return path.join(CONTENT_ROOT, collections[collection].dir);
+function collectionDir(locale: Locale, collection: CollectionName): string {
+  return path.join(CONTENT_ROOT, locale, collections[collection].dir);
 }
 
 function isMissing(error: unknown): boolean {
@@ -61,17 +68,25 @@ function sortFor(collection: CollectionName) {
   return collection === "projets" ? byYearDesc : byDateDesc;
 }
 
+/** The locale actually read, then the one to fall back to. */
+function readOrder(locale: Locale): readonly Locale[] {
+  return locale === routing.defaultLocale
+    ? [routing.defaultLocale]
+    : [locale, routing.defaultLocale];
+}
+
 /**
  * Splits and validates one file. Zod's own message dumps the offending value
  * and no filename, which is unusable in a `next build` log — the repo-relative
  * path goes first, then one line per issue.
  */
 function parseEntry<C extends CollectionName>(
+  locale: Locale,
   collection: C,
   slug: string,
   raw: string,
 ): Entry<C> {
-  const filePath = `src/content/${collection}/${slug}${MDX_EXTENSION}`;
+  const filePath = `src/content/${locale}/${collection}/${slug}${MDX_EXTENSION}`;
   const match = FRONTMATTER.exec(raw);
 
   if (!match) {
@@ -95,6 +110,8 @@ function parseEntry<C extends CollectionName>(
       ...frontmatter,
       collection,
       slug,
+      locale,
+      fallbackFrom: null,
       filePath,
       readingMinutes: Math.max(1, Math.round(readingTime(body).minutes)),
     } as EntryMeta<C>,
@@ -103,6 +120,7 @@ function parseEntry<C extends CollectionName>(
 }
 
 async function readEntry<C extends CollectionName>(
+  locale: Locale,
   collection: C,
   slug: string,
 ): Promise<Entry<C> | null> {
@@ -110,10 +128,10 @@ async function readEntry<C extends CollectionName>(
 
   try {
     const raw = await readFile(
-      path.join(collectionDir(collection), `${slug}${MDX_EXTENSION}`),
+      path.join(collectionDir(locale, collection), `${slug}${MDX_EXTENSION}`),
       "utf8",
     );
-    return parseEntry(collection, slug, raw);
+    return parseEntry(locale, collection, slug, raw);
   } catch (error: unknown) {
     if (isMissing(error)) return null;
     throw error;
@@ -121,39 +139,52 @@ async function readEntry<C extends CollectionName>(
 }
 
 async function readAll<C extends CollectionName>(
+  locale: Locale,
   collection: C,
 ): Promise<readonly Entry<C>[]> {
+  const dir = collectionDir(locale, collection);
   let files: string[];
 
   try {
-    const dirents = await readdir(collectionDir(collection), {
-      withFileTypes: true,
-    });
+    const dirents = await readdir(dir, { withFileTypes: true });
     files = dirents
       .filter((d) => d.isFile() && d.name.endsWith(MDX_EXTENSION))
       .map((d) => d.name.slice(0, -MDX_EXTENSION.length));
   } catch (error: unknown) {
+    // A locale that has not been translated yet simply has no directory.
     if (isMissing(error)) return [];
     throw error;
   }
 
   const entries = await Promise.all(
     files.map(async (slug) => {
-      const raw = await readFile(
-        path.join(collectionDir(collection), `${slug}${MDX_EXTENSION}`),
-        "utf8",
-      );
-      return parseEntry(collection, slug, raw);
+      const raw = await readFile(path.join(dir, `${slug}${MDX_EXTENSION}`), "utf8");
+      return parseEntry(locale, collection, slug, raw);
     }),
   );
 
   return entries.filter((entry) => isPublished(entry.meta));
 }
 
+/** Flags an entry as served in a language the reader did not ask for. */
+function asFallback<C extends CollectionName>(
+  entry: Entry<C>,
+  requested: Locale,
+): Entry<C> {
+  if (entry.meta.locale === requested) return entry;
+  return {
+    ...entry,
+    meta: { ...entry.meta, fallbackFrom: entry.meta.locale },
+  };
+}
+
 /**
- * Static params for a `[slug]` route. Throws rather than returning `[]`:
- * `cacheComponents` rejects an empty `generateStaticParams`, and its own error
- * doesn't say which directory is empty.
+ * Every slug of a collection, across every locale. The union is deliberate:
+ * a page must exist in both languages even when only one translation is
+ * written, because the untranslated one falls back rather than 404s.
+ *
+ * Throws rather than returning `[]`: `cacheComponents` rejects an empty
+ * `generateStaticParams`, and its own error doesn't say which directory is empty.
  */
 export async function getSlugs(
   collection: CollectionName,
@@ -162,43 +193,83 @@ export async function getSlugs(
   cacheLife("max");
   cacheTag("content", `content:${collection}`);
 
-  const entries = await readAll(collection);
+  const perLocale = await Promise.all(
+    routing.locales.map((locale) => readAll(locale, collection)),
+  );
 
-  if (entries.length === 0) {
+  // The default locale wins ties, so ordering follows the language that is
+  // guaranteed to be complete.
+  const bySlug = new Map<string, EntryMeta>();
+  for (const entries of perLocale) {
+    for (const { meta } of entries) {
+      const seen = bySlug.get(meta.slug);
+      if (!seen || seen.locale !== routing.defaultLocale) bySlug.set(meta.slug, meta);
+    }
+  }
+
+  if (bySlug.size === 0) {
     throw new Error(
-      `src/content/${collection}/ ne contient aucun fichier .mdx publié — ` +
+      `src/content/*/${collection}/ ne contient aucun fichier .mdx publié — ` +
         "generateStaticParams doit renvoyer au moins un paramètre (cacheComponents).",
     );
   }
 
-  return [...entries].sort((a, b) => sortFor(collection)(a.meta, b.meta)).map((entry) => entry.meta.slug);
+  return [...bySlug.values()]
+    .sort(sortFor(collection))
+    .map((meta) => meta.slug);
 }
 
-/** `null` for an unknown slug, a malformed slug, or a draft in production. */
+/**
+ * `null` for an unknown slug, a malformed slug, or a draft in production.
+ * Falls back to the default locale when the requested translation is missing.
+ */
 export async function getEntry<C extends CollectionName>(
   collection: C,
   slug: string,
+  locale: Locale,
 ): Promise<Entry<C> | null> {
   "use cache";
   cacheLife("max");
-  cacheTag("content", `content:${collection}`, `content:${collection}:${slug}`);
+  cacheTag(
+    "content",
+    `content:${locale}`,
+    `content:${locale}:${collection}`,
+    `content:${locale}:${collection}:${slug}`,
+  );
 
-  const entry = await readEntry(collection, slug);
-  if (!entry || !isPublished(entry.meta)) return null;
-  return entry;
+  for (const candidate of readOrder(locale)) {
+    const entry = await readEntry(candidate, collection, slug);
+    if (entry && isPublished(entry.meta)) return asFallback(entry, locale);
+  }
+
+  return null;
 }
 
-/** Metadata only — list pages never compile the MDX bodies they link to. */
+/**
+ * Metadata only — list pages never compile the MDX bodies they link to.
+ * Untranslated entries appear in the default locale rather than disappearing.
+ */
 export async function getEntries<C extends CollectionName>(
   collection: C,
+  locale: Locale,
 ): Promise<readonly EntryMeta<C>[]> {
   "use cache";
   cacheLife("max");
-  cacheTag("content", `content:${collection}`);
+  cacheTag("content", `content:${locale}`, `content:${locale}:${collection}`);
 
-  const entries = await readAll(collection);
-  return entries
-    .map((entry) => entry.meta)
+  const bySlug = new Map<string, EntryMeta<C>>();
+
+  // Reverse order: the requested locale is read last and overwrites the fallback.
+  for (const candidate of [...readOrder(locale)].reverse()) {
+    for (const { meta } of await readAll(candidate, collection)) {
+      bySlug.set(meta.slug, meta as EntryMeta<C>);
+    }
+  }
+
+  return [...bySlug.values()]
+    .map((meta) =>
+      meta.locale === locale ? meta : { ...meta, fallbackFrom: meta.locale },
+    )
     .sort(sortFor(collection) as (a: EntryMeta<C>, b: EntryMeta<C>) => number);
 }
 
@@ -206,12 +277,18 @@ export async function getEntries<C extends CollectionName>(
 export async function getAdjacent<C extends CollectionName>(
   collection: C,
   slug: string,
+  locale: Locale,
 ): Promise<{ previous: EntryMeta<C> | null; next: EntryMeta<C> | null }> {
   "use cache";
   cacheLife("max");
-  cacheTag("content", `content:${collection}`, `content:${collection}:${slug}`);
+  cacheTag(
+    "content",
+    `content:${locale}`,
+    `content:${locale}:${collection}`,
+    `content:${locale}:${collection}:${slug}`,
+  );
 
-  const entries = await getEntries(collection);
+  const entries = await getEntries(collection, locale);
   const index = entries.findIndex((meta) => meta.slug === slug);
 
   if (index === -1) return { previous: null, next: null };

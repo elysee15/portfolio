@@ -8,7 +8,7 @@
 
 import type { MDXRemoteProps } from "next-mdx-remote/rsc";
 
-import { TextLink } from "@/components/text-link";
+import { TextLink } from "@/components/ui/text-link";
 import { Callout } from "./callout";
 import { Figure } from "./figure";
 

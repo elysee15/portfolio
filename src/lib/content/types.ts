@@ -4,12 +4,21 @@
  * instances. Dates are ISO `YYYY-MM-DD` strings, which also sort correctly.
  */
 
+import type { Locale } from "@/src/i18n/routing";
+
 export type CollectionName = "blog" | "notes" | "projets";
 
 /** Validated frontmatter, plus everything derived from the file itself. */
 export interface EntryMetaBase {
   collection: CollectionName;
   slug: string;
+  /** The language this file is written in — not necessarily the one requested. */
+  locale: Locale;
+  /**
+   * Set when the requested locale had no file and another one was served in its
+   * place, so the page can say so. `null` when the translation exists.
+   */
+  fallbackFrom: Locale | null;
   /** Repo-relative, so build errors name a file you can open. */
   filePath: string;
   title: string;

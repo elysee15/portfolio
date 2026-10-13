@@ -1,0 +1,159 @@
+{
+  "Site": {
+    "title": "Elysée Bleu",
+    "description": "Elysée Bleu, développeur Frontend senior à Abidjan."
+  },
+  "Nav": {
+    "main": "Navigation principale",
+    "skipLink": "Aller au contenu",
+    "home": "Accueil",
+    "projets": "Projets",
+    "blog": "Blog",
+    "notes": "Notes",
+    "lab": "Lab",
+    "contact": "Contact",
+    "cv": "CV"
+  },
+  "Theme": {
+    "label": "Thème : {theme}",
+    "action": "Thème {theme}. Changer de thème",
+    "system": "système",
+    "light": "clair",
+    "dark": "sombre"
+  },
+  "LocaleToggle": {
+    "action": "Langue : {language}. Changer de langue",
+    "fr": "FR",
+    "en": "EN"
+  },
+  "Palette": {
+    "open": "Ouvrir la palette de commande",
+    "dialog": "Palette de commande",
+    "search": "Rechercher",
+    "placeholder": "Rechercher une section, une page, un écrit",
+    "empty": "Aucun résultat",
+    "close": "Fermer la palette de commande",
+    "group": {
+      "sections": "Sections",
+      "pages": "Pages",
+      "projets": "Projets",
+      "notes": "Notes",
+      "blog": "Écrits"
+    },
+    "section": {
+      "bio": "Bio",
+      "experience": "Expérience",
+      "activite": "Activité",
+      "projets": "Projets"
+    }
+  },
+  "Footer": {
+    "email": "Email",
+    "copied": "Copié",
+    "copiedStatus": "Adresse email copiée",
+    "copyAction": "Copier l’adresse email {email}"
+  },
+  "Player": {
+    "region": "Lecteur de musique",
+    "previous": "Piste précédente",
+    "previousShort": "Préc.",
+    "next": "Piste suivante",
+    "nextShort": "Suiv.",
+    "play": "Lire",
+    "pause": "Pause",
+    "playlist": "Playlist ({count})",
+    "nowPlaying": "Lecture : {title}, {artist}"
+  },
+  "Illustration": {
+    "caption": "Lagune Ébrié, Abidjan"
+  },
+  "Content": {
+    "empty": "Rien de publié pour l’instant.",
+    "readingTime": "{minutes} min de lecture",
+    "role": "Rôle",
+    "year": "Année",
+    "stack": "Stack",
+    "online": "En ligne",
+    "code": "Code",
+    "fallbackNotice": "Cette page n’est pas encore traduite. Elle est affichée en français."
+  },
+  "Home": {
+    "experience": "Expérience",
+    "present": "aujourd’hui",
+    "activity": "Activité",
+    "play": "Jouer",
+    "quit": "Quitter le jeu",
+    "expand": "Agrandir le jeu",
+    "collapse": "Réduire le jeu",
+    "sound": "Son : {state}",
+    "soundOn": "activé",
+    "soundOff": "coupé",
+    "snakeBoard": "Snake, joué sur le graphe de contributions. Flèches du clavier ou balayage pour diriger le serpent, Entrée pour recommencer.",
+    "snakeReady": "Prêt · appuyez sur une flèche pour démarrer",
+    "snakeScore": "Score : {score}",
+    "snakePaused": "En pause · appuyez sur une flèche pour reprendre",
+    "snakeOver": "Perdu · score : {score} · une flèche pour rejouer",
+    "snakeUp": "Aller vers le haut",
+    "snakeDown": "Aller vers le bas",
+    "snakeLeft": "Aller à gauche",
+    "snakeRight": "Aller à droite",
+    "contributions": "Contributions GitHub des 12 derniers mois. Flèches du clavier pour parcourir les jours.",
+    "contributionsUnavailable": "Le graphe de contributions est momentanément indisponible.",
+    "contributionsNoToken": "Le graphe de contributions se lit via l’API GitHub : il demande un GITHUB_TOKEN dans l’environnement.",
+    "contributionsDay": "{count, plural, one {# contribution} other {# contributions}} · {date}",
+    "contributionsTotal": "{total} {count, plural, one {contribution} other {contributions}} sur les 12 derniers mois",
+    "less": "Moins",
+    "more": "Plus",
+    "projects": "Projets",
+    "allProjects": "Tous les projets ({count})"
+  },
+  "Projects": {
+    "allProjects": "Tous les projets",
+    "company": "Entreprise",
+    "personal": "Personnel",
+    "filterLabel": "Filtrer les projets",
+    "labLink": "Projets personnels, freelance et formations",
+    "newWindow": "(nouvelle fenêtre)"
+  },
+  "Blog": {
+    "title": "Blog",
+    "description": "Notes longues sur le frontend, le rendu serveur et l’outillage."
+  },
+  "Notes": {
+    "title": "Notes",
+    "description": "Notes courtes : détails d’interface, raccourcis, décisions."
+  },
+  "Projets": {
+    "title": "Projets",
+    "description": "Études de cas : contexte, décisions, et ce qui a changé."
+  },
+  "Lab": {
+    "title": "Lab",
+    "toc": "Sommaire du Lab"
+  },
+  "Cv": {
+    "title": "CV",
+    "experience": "Expérience",
+    "education": "Formation",
+    "stack": "Stack",
+    "pdf": "PDF",
+    "print": "Imprimer"
+  },
+  "Contact": {
+    "title": "Contact",
+    "description": "Pour un projet, une mission ou un poste, écrivez-moi. Je réponds par email.",
+    "location": "{city}, Côte d’Ivoire",
+    "formTitle": "M’écrire",
+    "name": "Nom",
+    "email": "Email",
+    "message": "Message",
+    "characters": "{count, plural, one {# caractère} other {# caractères}}",
+    "send": "Envoyer",
+    "enter": "Entrée",
+    "subject": "Message de {name}",
+    "sent": "Votre client mail s’ouvre avec le message prérempli.",
+    "errorName": "Indiquez votre nom.",
+    "errorEmail": "Indiquez une adresse email valide.",
+    "errorMessage": "Écrivez votre message."
+  }
+}

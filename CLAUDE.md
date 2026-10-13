@@ -15,7 +15,9 @@ color scale, type scale, spacing, motion tokens, routes and the component invent
 
 - `bun install`, `bun run dev`, `bun run build`, `bunx shadcn@latest add <component>`
 - `bun <file>` instead of `node <file>` / `ts-node <file>`
-- `bun test` for unit tests; Playwright for E2E
+- `bun run test` for unit tests — Vitest, jsdom, `tests/setup.ts`. Never `bun test`: Bun's own
+  runner ignores [vitest.config.mts](./vitest.config.mts), so there is no DOM and no `vi` env helpers.
+- Playwright for E2E
 - Bun loads `.env` automatically — don't add `dotenv`
 
 Bun is the package manager and script runner. The app itself is served by Next.js
@@ -102,6 +104,15 @@ What that means in code:
 - After adding, strip any color the generated component hardcodes and re-point it at the tokens.
 - Primitives come from `@base-ui/react`, not Radix.
 
+## File organization
+
+[.claude/rules/file-organization.md](./.claude/rules/file-organization.md) is normative and
+**read before creating any file**. One folder per context: `components/{home,layout,content,mdx,ui}/`,
+`src/lib/<entity>/` for derivations over one entity, `src/utils/<primitive>.ts` for
+entity-free primitives, `src/data/<entity>.ts` for editorial data, `src/i18n/` for the locale
+config and the message files. No flat `components/`, no catch-all `utils.ts`, no barrel
+`index.ts`.
+
 ## Components
 
 - Server Components by default. Client islands only where DESIGN.md lists one
@@ -115,6 +126,25 @@ What that means in code:
   in a component is a build error. Keep `cacheLife` / `cacheTag` at the call site.
 - Cached values are serialized: no `Date`, `URL` or class instance in `EntryMeta`. Dates are
   ISO `YYYY-MM-DD` strings, formatted by `src/lib/content/format.ts`.
+
+## Languages
+
+FR / EN with `next-intl`, `localePrefix: "never"` — the locale is a `NEXT_LOCALE` cookie and
+never appears in a URL. Routes live under `app/[locale]/`; `proxy.ts` rewrites onto them.
+
+- UI labels are keys in `src/i18n/messages/<locale>.json`. Never hardcode a user-facing
+  string in a component.
+- Editorial prose in `src/data/` is `Localized` / `LocalizedList` (`src/i18n/localized.ts`).
+- MDX lives at `src/content/<locale>/<collection>/<slug>.mdx`. A missing translation falls
+  back to `fr` and renders `TranslationNotice`; it never 404s.
+- A server component resolves prose to one language before handing it to a client island —
+  both languages must never reach the browser.
+- next-intl's navigation helpers are not used at all. Use `next/link`: under `"never"` the
+  hrefs are identical, and next-intl's `Link` reaches for `headers()`, which throws inside a
+  `use cache` scope.
+- Switching locale is a cookie write (`src/i18n/locale-cookie.ts`) plus `router.refresh()`
+  from `next/navigation`. Never next-intl's `useRouter`: it forces a locale prefix on a
+  switch, so `/en/projets` costs a 307 back to `/projets` — three round trips instead of one.
 
 ## Dependencies
 

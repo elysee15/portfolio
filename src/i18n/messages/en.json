@@ -1,0 +1,159 @@
+{
+  "Site": {
+    "title": "Elysée Bleu",
+    "description": "Elysée Bleu, senior Frontend developer in Abidjan."
+  },
+  "Nav": {
+    "main": "Main navigation",
+    "skipLink": "Skip to content",
+    "home": "Home",
+    "projets": "Projects",
+    "blog": "Blog",
+    "notes": "Notes",
+    "lab": "Lab",
+    "contact": "Contact",
+    "cv": "Résumé"
+  },
+  "Theme": {
+    "label": "Theme: {theme}",
+    "action": "Theme {theme}. Change theme",
+    "system": "system",
+    "light": "light",
+    "dark": "dark"
+  },
+  "LocaleToggle": {
+    "action": "Language: {language}. Change language",
+    "fr": "FR",
+    "en": "EN"
+  },
+  "Palette": {
+    "open": "Open the command palette",
+    "dialog": "Command palette",
+    "search": "Search",
+    "placeholder": "Search a section, a page, a piece of writing",
+    "empty": "No result",
+    "close": "Close the command palette",
+    "group": {
+      "sections": "Sections",
+      "pages": "Pages",
+      "projets": "Projects",
+      "notes": "Notes",
+      "blog": "Writing"
+    },
+    "section": {
+      "bio": "Bio",
+      "experience": "Experience",
+      "activite": "Activity",
+      "projets": "Projects"
+    }
+  },
+  "Footer": {
+    "email": "Email",
+    "copied": "Copied",
+    "copiedStatus": "Email address copied",
+    "copyAction": "Copy the email address {email}"
+  },
+  "Player": {
+    "region": "Music player",
+    "previous": "Previous track",
+    "previousShort": "Prev.",
+    "next": "Next track",
+    "nextShort": "Next",
+    "play": "Play",
+    "pause": "Pause",
+    "playlist": "Playlist ({count})",
+    "nowPlaying": "Playing: {title}, {artist}"
+  },
+  "Illustration": {
+    "caption": "Ébrié Lagoon, Abidjan"
+  },
+  "Content": {
+    "empty": "Nothing published yet.",
+    "readingTime": "{minutes} min read",
+    "role": "Role",
+    "year": "Year",
+    "stack": "Stack",
+    "online": "Live",
+    "code": "Code",
+    "fallbackNotice": "This page has not been translated yet. It is shown in French."
+  },
+  "Home": {
+    "experience": "Experience",
+    "present": "present",
+    "activity": "Activity",
+    "play": "Play",
+    "quit": "Quit the game",
+    "expand": "Expand the game",
+    "collapse": "Collapse the game",
+    "sound": "Sound: {state}",
+    "soundOn": "on",
+    "soundOff": "off",
+    "snakeBoard": "Snake, played on the contribution graph. Arrow keys or a swipe steer the snake, Enter restarts.",
+    "snakeReady": "Ready · press an arrow key to start",
+    "snakeScore": "Score: {score}",
+    "snakePaused": "Paused · press an arrow key to resume",
+    "snakeOver": "Game over · score: {score} · press an arrow to play again",
+    "snakeUp": "Move up",
+    "snakeDown": "Move down",
+    "snakeLeft": "Move left",
+    "snakeRight": "Move right",
+    "contributions": "GitHub contributions over the last 12 months. Use the arrow keys to move between days.",
+    "contributionsUnavailable": "The contribution graph is temporarily unavailable.",
+    "contributionsNoToken": "The contribution graph is read through the GitHub API: it needs a GITHUB_TOKEN in the environment.",
+    "contributionsDay": "{count, plural, one {# contribution} other {# contributions}} · {date}",
+    "contributionsTotal": "{total} {count, plural, one {contribution} other {contributions}} in the last 12 months",
+    "less": "Less",
+    "more": "More",
+    "projects": "Projects",
+    "allProjects": "All projects ({count})"
+  },
+  "Projects": {
+    "allProjects": "All projects",
+    "company": "Company",
+    "personal": "Personal",
+    "filterLabel": "Filter projects",
+    "labLink": "Personal projects, freelance and training",
+    "newWindow": "(new window)"
+  },
+  "Blog": {
+    "title": "Blog",
+    "description": "Long-form notes on frontend, server rendering and tooling."
+  },
+  "Notes": {
+    "title": "Notes",
+    "description": "Short notes: interface details, shortcuts, decisions."
+  },
+  "Projets": {
+    "title": "Projects",
+    "description": "Case studies: context, decisions, and what changed."
+  },
+  "Lab": {
+    "title": "Lab",
+    "toc": "Lab contents"
+  },
+  "Cv": {
+    "title": "Résumé",
+    "experience": "Experience",
+    "education": "Education",
+    "stack": "Stack",
+    "pdf": "PDF",
+    "print": "Print"
+  },
+  "Contact": {
+    "title": "Contact",
+    "description": "For a project, a contract or a role, write to me. I answer by email.",
+    "location": "{city}, Côte d’Ivoire",
+    "formTitle": "Write to me",
+    "name": "Name",
+    "email": "Email",
+    "message": "Message",
+    "characters": "{count, plural, one {# character} other {# characters}}",
+    "send": "Send",
+    "enter": "Enter",
+    "subject": "Message from {name}",
+    "sent": "Your mail client opens with the message prefilled.",
+    "errorName": "Please enter your name.",
+    "errorEmail": "Please enter a valid email address.",
+    "errorMessage": "Please write your message."
+  }
+}

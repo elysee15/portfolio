@@ -1,26 +1,18 @@
 /**
- * Rendering helpers for content metadata. French, and timezone-pinned to UTC
- * so `2026-03-01` never renders as « 28 février ».
+ * Rendering helpers for content metadata. The calendar maths and the `Intl`
+ * setup live in `src/utils/date.ts` — this module only says how a *content
+ * entry* presents them. Reading time is a sentence, not a format, so it is a
+ * message key (`Content.readingTime`) rather than a function here.
  */
 
-const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-  timeZone: "UTC",
-});
+import { formatLongDate, type IsoDate, type LocaleTag } from "@/src/utils/date";
 
 /** `"2026-03-14"` → `"14 mars 2026"`. */
-export function formatDate(iso: string): string {
-  return dateFormatter.format(new Date(`${iso}T00:00:00Z`));
+export function formatDate(iso: IsoDate, locale: LocaleTag): string {
+  return formatLongDate(iso, locale);
 }
 
 /** Value for the `dateTime` attribute of `<time>`. Already ISO; kept explicit. */
-export function formatDateTime(iso: string): string {
+export function formatDateTime(iso: IsoDate): string {
   return iso;
-}
-
-/** `6` → `"6 min de lecture"`. `reading-time`'s own `.text` is English. */
-export function formatReadingTime(minutes: number): string {
-  return `${minutes} min de lecture`;
 }
